@@ -1,0 +1,63 @@
+# CreatorHub - Docker Compose for Local Development
+# Usage: npm run docker:up | npm run docker:down
+
+version: '3.9'
+
+services:
+  # ── PostgreSQL 16 ──────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: creatorhub-postgres
+    restart: unless-stopped
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: creatorhub
+      POSTGRES_PASSWORD: creatorhub_dev_2026
+      POSTGRES_DB: creatorhub
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U creatorhub']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Redis 7 ────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: creatorhub-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── MinIO (S3-compatible storage for dev) ──────────────────────
+  minio:
+    image: minio/minio:latest
+    container_name: creatorhub-minio
+    restart: unless-stopped
+    ports:
+      - '9000:9000'   # API
+      - '9001:9001'   # Console
+    environment:
+      MINIO_ROOT_USER: creatorhub
+      MINIO_ROOT_PASSWORD: creatorhub_dev_2026
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  minio_data:
+    driver: local
