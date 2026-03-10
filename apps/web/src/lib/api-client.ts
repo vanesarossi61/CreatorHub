@@ -423,6 +423,54 @@ export const upload = {
 };
 
 // =============================
+// PAYMENTS (Stripe)
+// =============================
+
+export interface CheckoutResponse {
+  sessionId: string;
+  sessionUrl: string;
+  amount: number;
+  currency: string;
+  platformFee: number;
+  netToCreator: number;
+}
+
+export interface ConnectStatus {
+  connected: boolean;
+  onboarded: boolean;
+  dashboardUrl: string | null;
+  chargesEnabled: boolean;
+  payoutsEnabled: boolean;
+  detailsSubmitted?: boolean;
+}
+
+export interface ConnectOnboardingResponse {
+  accountId: string;
+  onboardingUrl: string;
+  expiresAt: string;
+}
+
+export const payments = {
+  createCheckout(dealId: string, milestoneId?: string): Promise<CheckoutResponse> {
+    return request("/stripe/checkout", {
+      method: "POST",
+      body: JSON.stringify({ dealId, milestoneId }),
+    });
+  },
+
+  getConnectStatus(): Promise<ConnectStatus> {
+    return request("/stripe/connect");
+  },
+
+  startConnectOnboarding(country?: string): Promise<ConnectOnboardingResponse> {
+    return request("/stripe/connect", {
+      method: "POST",
+      body: JSON.stringify({ country }),
+    });
+  },
+};
+
+// =============================
 // CONVENIENCE: Default export
 // =============================
 
@@ -438,6 +486,7 @@ const api = {
   messages,
   reviews,
   upload,
+  payments,
 };
 
 export default api;
