@@ -32,7 +32,7 @@ export function formatCurrency(amount: number, currency = "USD"): string {
 
 /**
  * Format a date relative to now.
- * formatRelativeDate(date) => "hace 2 horas", "hace 3 días", etc.
+ * formatRelativeDate(date) => "hace 2 horas", "hace 3 d\u00edas", etc.
  */
 export function formatRelativeDate(date: Date | string): string {
   const now = new Date();
